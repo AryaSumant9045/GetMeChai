@@ -13,5 +13,6 @@ const PaymentSchema = new Schema({
     done: {type:Boolean, default:false}
 })
 
-const Payment = model("Payment", PaymentSchema)
-export default mongoose.models.Payment || Payment
+export default mongoose.models.Payment || model("Payment", PaymentSchema)
+// const Payment = model("Payment", PaymentSchema)
+// export default mongoose.models.Payment || Payment

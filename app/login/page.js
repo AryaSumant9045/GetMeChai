@@ -1,17 +1,20 @@
 // app/(your-folder)/page.tsx
 'use client'
 
-import { useSession, signIn, signOut } from "next-auth/react"
-import {React } from 'react'
+import { useSession, signIn } from "next-auth/react"
+import { useEffect } from 'react'
 import Image from 'next/image'
 import { useRouter } from "next/navigation" //for navigate to your specific page
 
 const Login = () => {
   const { data: session } = useSession()
   const router = useRouter() //hooks outside conditon hi hone chaiye
-    if(session){
+
+  useEffect(() => {
+    if (session) {
       router.push('/dashboard')
     }
+  }, [session, router])
 
   return (
     <div className="text-white py-8 container mx-auto min-h-screen">
@@ -19,7 +22,7 @@ const Login = () => {
         Login/Signup to get your fans to support you
       </h1>
 
-      <div className= " flex flex-col gap-3 justify-center items-center p-10 rounded-md">
+      <div className=" flex flex-col gap-3 justify-center items-center p-10 rounded-md">
         {/* Google */}
         <button
           type="button"
@@ -79,44 +82,44 @@ const Login = () => {
 
         {/* Github - use uploaded file as icon */}
         <button
-        onClick={()=>{signIn('github')}}
-      type="button"
-      aria-label="Continue with GitHub"
-      className="w-[-webkit-fill-available] flex items-center bg-white border border-gray-300 rounded-lg shadow-md max-w-xs px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-    >
-      <div className="h-6 w-6 mr-2 relative">
-        <Image
-          src="github.png"
-          alt="Github icon"
-          width={24}
-          height={24}
-          className="object-contain rounded-sm"
-          unoptimized // <-- important for local/dev path loader bypass
-        />
-      </div>
+          onClick={() => { signIn('github') }}
+          type="button"
+          aria-label="Continue with GitHub"
+          className="w-[-webkit-fill-available] flex items-center bg-white border border-gray-300 rounded-lg shadow-md max-w-xs px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+        >
+          <div className="h-6 w-6 mr-2 relative">
+            <Image
+              src="github.png"
+              alt="Github icon"
+              width={24}
+              height={24}
+              className="object-contain rounded-sm"
+              unoptimized // <-- important for local/dev path loader bypass
+            />
+          </div>
 
-      <span>Continue with Github</span>
-    </button>
+          <span>Continue with Github</span>
+        </button>
 
         {/* Apple (correct SVG) */}
         <button
-      type="button"
-      aria-label="Continue with Apple"
-      className="w-[-webkit-fill-available] flex items-center bg-white border border-gray-300 rounded-lg shadow-md max-w-xs px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-    >
-      <div className="h-6 w-6 mr-2 relative">
-        <Image
-          src="apple.png"   // your Apple icon image
-          alt="Apple icon"
-          width={24}
-          height={24}
-          className="object-contain"
-          unoptimized     // fixes Next.js loader issue for local dev paths
-        />
-      </div>
+          type="button"
+          aria-label="Continue with Apple"
+          className="w-[-webkit-fill-available] flex items-center bg-white border border-gray-300 rounded-lg shadow-md max-w-xs px-6 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+        >
+          <div className="h-6 w-6 mr-2 relative">
+            <Image
+              src="apple.png"   // your Apple icon image
+              alt="Apple icon"
+              width={24}
+              height={24}
+              className="object-contain"
+              unoptimized     // fixes Next.js loader issue for local dev paths
+            />
+          </div>
 
-      <span>Continue with Apple</span>
-    </button>
+          <span>Continue with Apple</span>
+        </button>
       </div>
     </div>
   )
