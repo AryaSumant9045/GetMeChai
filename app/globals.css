@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---- SMOOTH, NO-JERK BACKGROUND-POSITION ANIMATIONS ---- */
+@keyframes waterFlowLongSmooth {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes waterFlowShortSmooth {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: -200% 50%; }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ---- base button tweaks ---- */
+.btn-water {
+  transition: transform .18s ease, box-shadow .18s ease;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  cursor: pointer;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* animated gradient layers
+   NOTE: we animate background-position (not transform) for a perfectly seamless loop */
+.btn-water .water-layer {
+  background-repeat: repeat;
+  background-size: 300% 100%;           /* large size for smooth pan */
+  will-change: background-position, opacity;
+  filter: saturate(1.1) contrast(1.05);
+  border-radius: inherit;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* slow soft base flow (multicolor pastel) - smooth pan to the right */
+.btn-water .water-layer.slow {
+  background-image: linear-gradient(90deg,
+    rgba(14,165,233,0.25) 0%,
+    rgba(99,102,241,0.25) 25%,
+    rgba(236,72,153,0.25) 50%,
+    rgba(99,102,241,0.20) 75%,
+    rgba(14,165,233,0.20) 100%
+  );
+  background-size: 300% 100%;
+  animation: waterFlowLongSmooth 8s linear infinite;   /* long, very smooth pan */
+  opacity: 0.65;
+  filter: blur(10px) contrast(1.02);
+}
+
+/* fast bright overlay — smooth pan in opposite direction for parallax */
+.btn-water .water-layer.fast {
+  background-image: linear-gradient(90deg,
+    rgba(58,123,213,0.85) 0%,
+    rgba(16,185,129,0.85) 33%,
+    rgba(236,72,153,0.85) 66%,
+    rgba(99,102,241,0.85) 100%
+  );
+  background-size: 300% 100%;
+  animation: waterFlowShortSmooth 3.5s linear infinite; /* faster default but still smooth */
+  opacity: 0.45;
+  mix-blend-mode: screen;
+  filter: blur(6px) saturate(1.2);
+}
+
+/* hover intensifies everything: faster, brighter shadow, slight scale */
+.btn-water:hover {
+  transform: translateY(-3px) scale(1.025);
+  box-shadow:
+    0 6px 20px rgba(99,102,241,0.18),
+    0 12px 40px rgba(14,165,233,0.12),
+    0 18px 60px rgba(236,72,153,0.06);
+}
+
+/* speed up the fast layer on hover for that quick water rush (smooth change) */
+.btn-water:hover .water-layer.fast {
+  animation-duration: 0.85s;     /* quick rush on hover */
+  opacity: 0.9;
+  filter: blur(4px) saturate(1.35);
+}
+
+/* subtle stronger glow on focus (keyboard accessible) */
+.btn-water:focus {
+  outline: none;
+  box-shadow: 0 0 0 5px rgba(99,102,241,0.12), 0 10px 30px rgba(14,165,233,0.12);
+}
+
+/* keep it calm for reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  .btn-water .water-layer { animation: none !important; background-position: 0% 50% !important; }
+  .btn-water { transition: none !important; transform: none !important; }
 }
