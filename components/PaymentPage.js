@@ -1,18 +1,63 @@
 'use client'
 
-import { React, useState } from 'react'
+import { React, useEffect, useState } from 'react'
 import Script from 'next/script'
 import { initiate } from '@/actions/useractions'
 import { useSession } from 'next-auth/react'
+import { fetchuser, fetchpayments } from '@/actions/useractions'
+import { toast } from 'react-toastify'
+import { Bounce } from 'react-toastify'
+import { useSearchParams } from 'next/navigation'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from 'next/navigation'
 
+// payment page component
 const PaymentPage = ({ username }) => {
     const { data: session, status } = useSession()
     const [paymentform, setPaymentform] = useState({ name: "", message: "", amount: "" })
-
+    const [currentUser, setCurrentUser] = useState({})
+    const [payments, setPayments] = useState([])
+    const searchParams = useSearchParams() //
+    const router = useRouter()
+    // handle change of payment form
     const handleChange = (e) => {
         setPaymentform({ ...paymentform, [e.target.name]: e.target.value })
     }
+    // get data of user and payments
+    useEffect(() => {
+        getData()
+    }, [])
+    // tost
+    useEffect(() => {
+        if (searchParams.get("paymentdone") ==='true') {
+            // tost("Payment done successfully", { type: "success" })
+            toast('Thank you for your support!', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Bounce,
+            });
+        }
+        router.push(`/${username}`)
+    }, [])
 
+
+    // get data of user and payments
+    const getData = async (params) => {
+        let u = await fetchuser(username)
+        setCurrentUser(u)
+        let dbpayments = await fetchpayments(username)
+        setPayments(dbpayments)
+        console.log(u, dbpayments)
+    }
+
+    // initiate payment
     const pay = async (amount) => {
         //Get the order ID
         let a = await initiate(amount, username, paymentform)
@@ -44,6 +89,19 @@ const PaymentPage = ({ username }) => {
     }
     return (
         <>
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+                transition={Bounce}
+            />
             <Script src="https://checkout.razorpay.com/v1/checkout.js" />
 
 
@@ -52,7 +110,7 @@ const PaymentPage = ({ username }) => {
                 {/* {resolvedParams.username} */}
                 <div className="cover relative">
                     <img src="https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4842667/452146dcfeb04f38853368f554aadde1/eyJ3IjoxNjAwLCJ3ZSI6MX0%3D/18.gif?token-hash=g6HitpHZigKvTCOxoDp--T61h2BEQeCThLTXU5q-Vls%3D&token-time=1764806400" alt="" />
-                    <div ><img height={150} className="left-[500px] relative top-0 border border-black rounded-full -mt-10" width={150} src="https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4842667/aa52624d1cef47ba91c357da4a7859cf/eyJoIjozNjAsInciOjM2MH0%3D/4.gif?token-hash=vSqDOy1W6n0066PHtETadSa0NpQ1XSddnUMBHxoEMfI%3D&token-time=1765411200" alt="" />
+                    <div ><img height={150} className="left-[500px] relative top-0 border border-black rounded-full -mt-10" width={150} src={currentUser.profilepic} alt="" />
                     </div>
                 </div>
                 <div className=" info flex justify-center flex-col text-center">
@@ -73,27 +131,16 @@ const PaymentPage = ({ username }) => {
                             {/* show list of all supporter as a leaderboard */}
                             <h2 className=" text-yellow-500 text-2xl font-bold mb-5">Our Supporters</h2>
                             <ul className="">
-                                <li className="flex items-center gap-3 p-1 m-1 rounded-lg bg-slate-800">
-                                    <img width={40} src="person.gif" alt="person" className="rounded-full border bg-slate-800" />
-                                    <p className="text-sm font-medium text-white">
-                                        <span className="font-semibold">Rishab <span className="text-green-300">$40</span> I support You bro with lots of ❤️ </span>
-                                    </p>
-                                </li>
-                                <li className="flex items-center gap-3 p-1 m-1 rounded-lg bg-slate-800">
-                                    <img width={40} src="person.gif" alt="person" className="rounded-full border bg-slate-800" />
-                                    <p className="text-sm font-medium text-white">
-                                        <span className="font-semibold">Rishab <span className="text-green-300">$40</span> I support You bro with lots of ❤️ </span>
-                                    </p>
-                                </li>
-                                <li className="flex items-center gap-3 p-1 m-1 rounded-lg bg-slate-800">
-                                    <img width={40} src="person.gif" alt="person" className="rounded-full border bg-slate-800" />
-                                    <p className="text-sm font-medium text-white">
-                                        <span className="font-semibold">Rishab <span className="text-green-300">$40</span> I support You bro with lots of ❤️ </span>
-                                    </p>
-                                </li>
-                                <li>Rishab donated $40 with a message</li>
-                                <li>Rishab donated $40 with a message</li>
-                                <li>Rishab donated $40 with a message</li>
+                                {payments.length === 0 && <p>No payments yet</p>}
+                                {payments.map((payment) => (
+                                    <li key={payment._id} className="flex items-center gap-3 p-1 m-1 rounded-lg bg-slate-800">
+                                        <img width={40} src="person.gif" alt="person" className="rounded-full border bg-slate-800" />
+                                        <p className="text-sm font-medium text-white">
+                                            <span className="font-semibold">{payment.name} Donated <span className="text-green-300">${payment.amount}</span> with message "{payment.message}"</span>
+                                        </p>
+                                    </li>
+                                ))}
+
                             </ul>
                         </div>
                         <div className="makepayment w-1/2 bg-white/10 backdrop-blur-lg text-white p-6 rounded-2xl shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] border border-white/20">
@@ -103,7 +150,7 @@ const PaymentPage = ({ username }) => {
                                 <input name="message" onChange={handleChange} value={paymentform.message} type="text" className="w-full p-3 rounded-lg bg-slate-800 " placeholder="Message" />
                                 <input name="amount" onChange={handleChange} value={paymentform.amount} type="text" className="w-full p-3 rounded-lg bg-slate-800 " placeholder="Total Amount" />
                                 <button
-                                    onClick={() => pay(paymentform.amount)}
+                                    onClick={() => pay(paymentform.amount * 100)}
                                     type="button"
                                     className="btn-water relative overflow-hidden px-6 py-3 rounded-lg text-white font-semibold focus:outline-none focus:ring-4 focus:ring-indigo-300/40"
                                 >
@@ -123,7 +170,7 @@ const PaymentPage = ({ username }) => {
                                 <button className="bg-slate-900 p-3 font-bold rounded-lg" onClick={() => pay(1000)}>₹10</button>
                                 <button className="bg-slate-900 p-3 font-bold rounded-lg" onClick={() => pay(2000)}> ₹20</button>
                                 <button className="bg-slate-900 p-3 font-bold rounded-lg" onClick={() => pay(5000)}> ₹50</button>
-                                <button className="bg-slate-900 p-3 font-bold rounded-lg" onClick={() => pay(100000)}> ₹10000</button>
+                                <button className="bg-slate-900 p-3 font-bold rounded-lg" onClick={() => pay(1000000)}> ₹10000</button>
                             </div>
                         </div>
                     </div>

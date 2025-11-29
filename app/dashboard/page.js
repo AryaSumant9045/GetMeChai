@@ -1,8 +1,13 @@
 'use client'
 
-import { useSession } from "next-auth/react"  //user login hai ya nahi batata
-import { useRouter } from "next/navigation"  //page navigate karne ka hook
-import { useEffect, useState } from "react"  //render ke baad code chalane ke liye (redirect error fix)
+import { useSession } from "next-auth/react" // useSession hook is used to get the session data
+import { useRouter } from "next/navigation" // useRouter hook is used to redirect the user to a different page
+import { useEffect, useState } from "react" // useEffect hook is used to run a function when the component is mounted
+import { fetchuser, updateprofile } from "@/actions/useractions" // fetchuser and updateprofile are custom actions
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+import { Bounce } from 'react-toastify';
 
 export default function Dashboard() {
   const { data: session, status } = useSession()
@@ -11,41 +16,63 @@ export default function Dashboard() {
     name: "",
     email: "",
     username: "",
-    profilepic: null,
-    coverpic: null,
+    profilepic: "",
+    coverpic: "",
     razorpayKeyId: "",
     razorpayKeySecret: "",
   })
-  const [touched, setTouched] = useState({})
 
+
+  // handleChange function is used to update the form data
   const handleChange = (event) => {
-    const { name, value, files } = event.target
-    setForm((prev) => ({
-      ...prev,
-      [name]: files && files.length > 0 ? files[0] : value,
-    }))
-    setTouched((prev) => ({
-      ...prev,
-      [name]: true,
-    }))
+    setForm({ ...form, [event.target.name]: event.target.value })
   }
-
-  // Fix redirect error
+// getData function is used to get the user data
+  const getData = async () => {
+    if (session?.user?.name) {
+      let u = await fetchuser(session.user.name)
+      setForm(u)
+    }
+  }
+// useEffect hook is used to run a function when the component is mounted
   useEffect(() => {
     if (status !== "loading" && !session) {
       router.push("/login")
+    } else if (session) {
+      getData()
     }
   }, [status, session, router])
-
+// handleSubmit function is used to update the user data
+  const handleSubmit = async (e) => {
+    let formData = new FormData()
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, value)
+    })
+    let a = await updateprofile(session.user.name, formData)
+    toast('Your Dashbord has been changed', {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+  }
+// if the session is loading, show loading message
   if (status === "loading") {
     return <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>
   }
-
+// if the session is not available, redirect to login page
   if (!session) {
     return <div className="min-h-screen flex items-center justify-center text-xl">Redirecting...</div>
   }
 
   return (
+<>
+    <ToastContainer />
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
 
       <div className="bg-gray-800 w-full max-w-2xl p-6 rounded-2xl shadow-lg text-white space-y-6">
@@ -59,7 +86,7 @@ export default function Dashboard() {
             id="name"
             name="name"
             type="text"
-            value={touched.name ? form.name : (session.user?.name ?? "")}
+            value={form.name ? form.name : ""}
             className="w-full p-2 rounded bg-gray-700 outline-none"
             onChange={handleChange}
           />
@@ -72,7 +99,7 @@ export default function Dashboard() {
             id="email"
             name="email"
             type="email"
-            value={touched.email ? form.email : (session.user?.email ?? "")}
+            value={form.email ? form.email : ""}
             className="w-full p-2 rounded bg-gray-700 outline-none"
             onChange={handleChange}
           />
@@ -85,7 +112,7 @@ export default function Dashboard() {
             id="username"
             name="username"
             type="text"
-            value={touched.username ? form.username : (session.user?.name ?? "")}
+            value={form.username ? form.username : ""}
             className="w-full p-2 rounded bg-gray-700 outline-none"
             onChange={handleChange}
           />
@@ -97,7 +124,8 @@ export default function Dashboard() {
           <input
             id="profilepic"
             name="profilepic"
-            type="file"
+            type="text"
+            value={form.profilepic ? form.profilepic : ""}
             className="w-full p-2 rounded bg-gray-700 outline-none"
             onChange={handleChange}
           />
@@ -109,7 +137,8 @@ export default function Dashboard() {
           <input
             id="coverpic"
             name="coverpic"
-            type="file"
+            type="text"
+            value={form.coverpic ? form.coverpic : ""} // if coverpic is not available, show empty string
             className="w-full p-2 rounded bg-gray-700 outline-none"
             onChange={handleChange}
           />
@@ -123,7 +152,7 @@ export default function Dashboard() {
             name="razorpayKeyId"
             type="text"
             placeholder="Enter Razorpay Key ID"
-            value={form.razorpayKeyId}
+            value={form.razorpayKeyId ? form.razorpayKeyId : ""}
             className="w-full p-2 rounded bg-gray-700 outline-none"
             onChange={handleChange}
           />
@@ -137,14 +166,14 @@ export default function Dashboard() {
             name="razorpayKeySecret"
             type="password"
             placeholder="Enter Razorpay Key Secret"
-            value={form.razorpayKeySecret ?? ""}
+            value={form.razorpayKeySecret ? form.razorpayKeySecret : ""}
             className="w-full p-2 rounded bg-gray-700 outline-none"
             onChange={handleChange}
           />
         </div>
 
         {/* SAVE BUTTON */}
-        <button className=" w-full
+        <button onClick={handleSubmit} className=" w-full
                             relative overflow-hidden 
                             px-6 py-3 rounded-lg font-semibold 
                             text-white bg-slate-900/80 
@@ -164,5 +193,6 @@ export default function Dashboard() {
       </div>
 
     </div>
+    </>
   )
 }
