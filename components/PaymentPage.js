@@ -110,7 +110,7 @@ const PaymentPage = ({ username }) => {
                 {/* {resolvedParams.username} */}
                 <div className="cover relative">
                     <img src="https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4842667/452146dcfeb04f38853368f554aadde1/eyJ3IjoxNjAwLCJ3ZSI6MX0%3D/18.gif?token-hash=g6HitpHZigKvTCOxoDp--T61h2BEQeCThLTXU5q-Vls%3D&token-time=1764806400" alt="" />
-                    <div ><img height={150} className="left-[500px] relative top-0 border border-black rounded-full -mt-10" width={150} src={currentUser.profilepic} alt="" />
+                    <div ><img height={150} className="left-[650px] relative top-0 border border-black rounded-full -mt-10" width={150} src={currentUser.profilepic} alt="" />
                     </div>
                 </div>
                 <div className=" info flex justify-center flex-col text-center">
