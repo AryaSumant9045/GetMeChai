@@ -19,6 +19,9 @@ const options = {
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
+    secret: process.env.NEXTAUTH_SECRET,
+
+    trustHost: true, // 🔥🔥 THIS FIXES OAuthSignin on Vercel
     // other providers (kept commented as requested)
   ],
 
