@@ -1,14 +1,14 @@
 // app/api/auth/[...nextauth]/route.js
-import NextAuth from 'next-auth'
+import NextAuth from 'next-auth';
 // import AppleProvider from 'next-auth/providers/apple'
 // import FacebookProvider from 'next-auth/providers/facebook'
 // import GoogleProvider from 'next-auth/providers/google'
 // import EmailProvider from 'next-auth/providers/email'
-import GitHubProvider from 'next-auth/providers/github'
+import GitHubProvider from 'next-auth/providers/github';
 
-import connectDB from '@/db/Connectdb'
-import User from '@/models/User'
-import Payment from '@/models/Payment'
+import connectDB from '@/db/Connectdb';
+import User from '@/models/User';
+import Payment from '@/models/Payment';
 // NOTE: importing app pages inside API routes can cause unexpected bundling/circular issues.
 // You asked to keep additional import; if this causes trouble, comment it out.
 // import Username from '@/app/[username]/page'
@@ -86,8 +86,8 @@ const options = {
   },
 
   // you can add other NextAuth options (pages, session, jwt, etc.) here
-}
+};
 
-const handler = NextAuth(options)
+const handler = NextAuth(options);
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };
