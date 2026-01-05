@@ -10,7 +10,7 @@ export const initiate = async (amount, to_username,
     payment_from) => {
     await connectDB()
     var instance = new Razorpay({ key_id: process.env.KEY_ID, key_secret: process.env.KEY_SECRET })
-    
+
     // create an order
     let options = {
         amount: Number.parseInt(amount),
@@ -22,7 +22,7 @@ export const initiate = async (amount, to_username,
     //create a payment object which shows a pending payment in the databse
     await Payment.create({
         oid: x.id,
-        amount: amount/100,
+        amount: amount / 100,
         to_user: to_username,
         name: payment_from.name,
         message: payment_from.message
@@ -34,6 +34,10 @@ export const initiate = async (amount, to_username,
 export const fetchuser = async (username) => {
     await connectDB()
     let u = await User.findOne({ username: username })
+    if (!u) {
+        console.log("User not found:", username)
+        return null
+    }
     let user = u.toObject({ flattenObjectIds: true })
     return user
 }
@@ -53,13 +57,13 @@ export const updateprofile = async (OldUsername, data) => {
     let ndata = Object.fromEntries(data)
 
     //If the username is being updated , check if username is available
-    if(OldUsername!==ndata.username){   
-        let u = await User.findOne({username:ndata.username})
-        if(u){
-            return {success:false,message:"Username is not available"}
+    if (OldUsername !== ndata.username) {
+        let u = await User.findOne({ username: ndata.username })
+        if (u) {
+            return { success: false, message: "Username is not available" }
         }
 
     }
-    await User.findOneAndUpdate({username:OldUsername},ndata)
-    return {success:true,message:"Profile updated successfully"}
+    await User.findOneAndUpdate({ username: OldUsername }, ndata)
+    return { success: true, message: "Profile updated successfully" }
 }

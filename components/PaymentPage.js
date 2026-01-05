@@ -27,11 +27,15 @@ const PaymentPage = ({ username }) => {
     // get data of user and payments
     useEffect(() => {
         getData()
-    }, [])
-    // tost
+    }, [username])
+    // toast and refetch data after payment
     useEffect(() => {
-        if (searchParams.get("paymentdone") ==='true') {
-            // tost("Payment done successfully", { type: "success" })
+        if (searchParams.get("paymentdone") === 'true') {
+            // Refetch payments to show new donation
+            fetchpayments(username).then((dbpayments) => {
+                setPayments(dbpayments)
+            })
+
             toast('Thank you for your support!', {
                 position: "top-right",
                 autoClose: 5000,
@@ -44,13 +48,16 @@ const PaymentPage = ({ username }) => {
                 transition: Bounce,
             });
         }
-        router.push(`/${username}`)
-    }, [])
+    }, [searchParams])
 
 
     // get data of user and payments
     const getData = async (params) => {
         let u = await fetchuser(username)
+        if (!u) {
+            console.log("User not found:", username)
+            return
+        }
         setCurrentUser(u)
         let dbpayments = await fetchpayments(username)
         setPayments(dbpayments)
@@ -73,11 +80,11 @@ const PaymentPage = ({ username }) => {
             "callback_url": `${process.env.NEXT_PUBLIC_URL}/api/razorpay`,
             "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information especially their phone number
                 "name": "Sumant Saini", //your customer's name
-                "email": "gaurav.kumar@example.com",
+                "email": "example.name@example.com",
                 "contact": "+918006153750" //Provide the customer's phone number for better conversion rates 
             },
             "notes": {
-                "address": "Razorpay Corporate Office"
+                "username": username
             },
             "theme": {
                 "color": "#3399cc"
@@ -108,12 +115,26 @@ const PaymentPage = ({ username }) => {
 
             <div>
                 {/* {resolvedParams.username} */}
-                <div className="cover relative">
-                    <img src="https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4842667/452146dcfeb04f38853368f554aadde1/eyJ3IjoxNjAwLCJ3ZSI6MX0%3D/18.gif?token-hash=g6HitpHZigKvTCOxoDp--T61h2BEQeCThLTXU5q-Vls%3D&token-time=1764806400" alt="" />
-                    <div ><img height={150} className="left-[650px] relative top-0 border border-black rounded-full -mt-10" width={150} src={currentUser.profilepic} alt="" />
+                <div className="cover relative w-full h-64 bg-gray-700 overflow-visible">
+                    <img
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWmUy6bxl4VPSUUk_xql7Dee-uSMGcwnebBA&s"
+                        alt="Cover"
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='400'%3E%3Crect fill='%23374151' width='1600' height='400'/%3E%3C/svg%3E" }}
+                    />
+                    {/* Profile Picture Positioned Over Cover */}
+                    <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-20">
+                        <img
+                            height={180}
+                            width={180}
+                            className="border-4 border-black rounded-full shadow-lg bg-gray-800"
+                            src={currentUser?.profilepic || "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4842667/452146dcfeb04f38853368f554aadde1/eyJ3IjoxNjAwLCJ3ZSI6MX0%3D/18.gif?token-hash=g6HitpHZigKvTCOxoDp--T61h2BEQeCThLTXU5q-Vls%3D&token-time=1764806400"}
+                            alt="Profile"
+                            onError={(e) => { e.target.src = "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/4842667/452146dcfeb04f38853368f554aadde1/eyJ3IjoxNjAwLCJ3ZSI6MX0%3D/18.gif?token-hash=g6HitpHZigKvTCOxoDp--T61h2BEQeCThLTXU5q-Vls%3D&token-time=1764806400" }}
+                        />
                     </div>
                 </div>
-                <div className=" info flex justify-center flex-col text-center">
+                <div className=" info flex justify-center flex-col text-center mt-20">
                     <div className="font-bold ">@{username}</div>
 
                     <div>
